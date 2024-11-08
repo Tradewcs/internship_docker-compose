@@ -1,0 +1,86 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+    depends_on:
+      - backend
+    
+  backend:
+    build:
+      context: ./
+    networks:
+      - backend
+    depends_on:
+      - redis
+      - postgresql
+      - mongodb
+      - tomcat
+
+  postgresql:
+    build:
+      context: ./
+      dockerfile: Dockerfile-postgres
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=database
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    
+  mongodb:
+    build:
+      context: ./
+      dockerfile: Dockerfile-mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - backend
+    volumes:
+      - mongo_data:/data/db
+    
+  redis:
+    build:
+      context: ./
+      dockerfile: Dockerfile-redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    volumes:
+      - redis_data:/data
+
+  tomcat:
+    build:
+      context: ./
+      dockerfile: Dockerfile-tomcat
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./webapps/myapp:/usr/local/tomcat/webapps/myapp
+    networks:
+      - backend
+    environment:
+      - CATALINA_OPTS="-Xms512m -Xmx1024m"
+    
+volumes:
+  mongo_data:
+    driver: local
+  pg_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  backend:
+    driver: bridge

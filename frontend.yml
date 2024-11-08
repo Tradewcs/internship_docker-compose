@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: internship_project_deployment
+  labels:
+    app: internship_project
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: internship_project
+  template:
+    metadata:
+      labels:
+        app: internship_project
+    spec:
+      containers:
+      - name: internship_project
+        image: tradewcs/internship_project-frontend:frontend
+        ports:
+        - containerPort: 3000
